@@ -13,6 +13,7 @@ import MapMarker from './MapMarker';
 import MapPolyline from './MapPolyline';
 import MapPolygon from './MapPolygon';
 import MapCircle from './MapCircle';
+import MapNextOverlay from './MapNextOverlay';
 import MapCallout from './MapCallout';
 import MapUrlTile from './MapUrlTile';
 import AnimatedRegion from './AnimatedRegion';
@@ -667,6 +668,8 @@ MapView.Polygon = MapPolygon;
 MapView.Circle = MapCircle;
 MapView.UrlTile = MapUrlTile;
 MapView.Callout = MapCallout;
+MapView.NextOverlay = MapNextOverlay;
+
 Object.assign(MapView, ProviderConstants);
 MapView.ProviderPropType = PropTypes.oneOf(Object.values(ProviderConstants));
 
