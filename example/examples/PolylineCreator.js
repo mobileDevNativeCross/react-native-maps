@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import MapView from 'react-native-maps';
+import MapView, { Polyline, ProviderPropType } from 'react-native-maps';
 
 const { width, height } = Dimensions.get('window');
 
@@ -55,10 +55,7 @@ class PolylineCreator extends React.Component {
       this.setState({
         editing: {
           ...editing,
-          coordinates: [
-            ...editing.coordinates,
-            e.nativeEvent.coordinate,
-          ],
+          coordinates: [...editing.coordinates, e.nativeEvent.coordinate],
         },
       });
     }
@@ -75,7 +72,7 @@ class PolylineCreator extends React.Component {
           onPanDrag={e => this.onPanDrag(e)}
         >
           {this.state.polylines.map(polyline => (
-            <MapView.Polyline
+            <Polyline
               key={polyline.id}
               coordinates={polyline.coordinates}
               strokeColor="#000"
@@ -83,15 +80,15 @@ class PolylineCreator extends React.Component {
               strokeWidth={1}
             />
           ))}
-          {this.state.editing &&
-            <MapView.Polyline
+          {this.state.editing && (
+            <Polyline
               key="editingPolyline"
               coordinates={this.state.editing.coordinates}
               strokeColor="#F00"
               fillColor="rgba(255,0,0,0.5)"
               strokeWidth={1}
             />
-          }
+          )}
         </MapView>
         <View style={styles.buttonContainer}>
           {this.state.editing && (
@@ -109,7 +106,7 @@ class PolylineCreator extends React.Component {
 }
 
 PolylineCreator.propTypes = {
-  provider: MapView.ProviderPropType,
+  provider: ProviderPropType,
 };
 
 const styles = StyleSheet.create({
@@ -144,4 +141,4 @@ const styles = StyleSheet.create({
   },
 });
 
-module.exports = PolylineCreator;
+export default PolylineCreator;

@@ -1,11 +1,6 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Dimensions,
-} from 'react-native';
-import MapView from 'react-native-maps';
+import { StyleSheet, View, Text, Dimensions } from 'react-native';
+import MapView, { Marker, ProviderPropType } from 'react-native-maps';
 import flagBlueImg from './assets/flag-blue.png';
 import flagPinkImg from './assets/flag-pink.png';
 
@@ -40,7 +35,7 @@ class MarkerTypes extends React.Component {
             longitudeDelta: LONGITUDE_DELTA,
           }}
         >
-          <MapView.Marker
+          <Marker
             onPress={() => this.setState({ marker1: !this.state.marker1 })}
             coordinate={{
               latitude: LATITUDE + SPACE,
@@ -51,8 +46,8 @@ class MarkerTypes extends React.Component {
             image={this.state.marker1 ? flagBlueImg : flagPinkImg}
           >
             <Text style={styles.marker}>X</Text>
-          </MapView.Marker>
-          <MapView.Marker
+          </Marker>
+          <Marker
             onPress={() => this.setState({ marker2: !this.state.marker2 })}
             coordinate={{
               latitude: LATITUDE - SPACE,
@@ -62,7 +57,7 @@ class MarkerTypes extends React.Component {
             anchor={{ x: 0.84, y: 1 }}
             image={this.state.marker2 ? flagBlueImg : flagPinkImg}
           />
-          <MapView.Marker
+          <Marker
             onPress={() => this.setState({ marker2: !this.state.marker2 })}
             coordinate={{
               latitude: LATITUDE + SPACE,
@@ -80,7 +75,7 @@ class MarkerTypes extends React.Component {
 }
 
 MarkerTypes.propTypes = {
-  provider: MapView.ProviderPropType,
+  provider: ProviderPropType,
 };
 
 const styles = StyleSheet.create({
@@ -99,4 +94,4 @@ const styles = StyleSheet.create({
   },
 });
 
-module.exports = MarkerTypes;
+export default MarkerTypes;

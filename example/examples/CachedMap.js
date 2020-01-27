@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import MapView from 'react-native-maps';
+import MapView, { ProviderPropType, Marker } from 'react-native-maps';
 import flagImg from './assets/flag-blue.png';
 
 const HORIZONTAL_PADDING = 12;
@@ -18,7 +18,9 @@ class CachedMap extends React.Component {
   constructor(props) {
     super(props);
 
-    const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+    const ds = new ListView.DataSource({
+      rowHasChanged: (r1, r2) => r1 !== r2,
+    });
     this.state = {
       dataSource: ds.cloneWithRows(COUNTRIES),
       cache: true,
@@ -38,7 +40,7 @@ class CachedMap extends React.Component {
 
   render() {
     const { width } = Dimensions.get('window');
-    const mapSize = width - (HORIZONTAL_PADDING * 2);
+    const mapSize = width - HORIZONTAL_PADDING * 2;
     return (
       <View style={styles.container}>
         <View style={styles.buttonContainer}>
@@ -46,15 +48,15 @@ class CachedMap extends React.Component {
             onPress={() => this.toggleCache()}
             style={[styles.bubble, styles.button]}
           >
-            <Text style={styles.buttonText}>{this.state.cache ? 'Cached' : 'Not cached'}</Text>
+            <Text style={styles.buttonText}>
+              {this.state.cache ? 'Cached' : 'Not cached'}
+            </Text>
           </TouchableOpacity>
         </View>
         <ListView
           dataSource={this.state.dataSource}
-          renderRow={(region) =>
-            <View
-              style={styles.item}
-            >
+          renderRow={region => (
+            <View style={styles.item}>
               <Text>{region.name}</Text>
               <MapView
                 provider={this.props.provider}
@@ -69,7 +71,7 @@ class CachedMap extends React.Component {
                 loadingIndicatorColor="#666666"
                 loadingBackgroundColor="#eeeeee"
               >
-                <MapView.Marker
+                <Marker
                   coordinate={region}
                   centerOffset={{ x: -18, y: -60 }}
                   anchor={{ x: 0.69, y: 1 }}
@@ -78,7 +80,7 @@ class CachedMap extends React.Component {
               </MapView>
               <View style={styles.divider} />
             </View>
-          }
+          )}
         />
       </View>
     );
@@ -86,7 +88,7 @@ class CachedMap extends React.Component {
 }
 
 CachedMap.propTypes = {
-  provider: MapView.ProviderPropType,
+  provider: ProviderPropType,
 };
 
 const styles = StyleSheet.create({
@@ -1832,4 +1834,4 @@ const COUNTRIES = [
   },
 ];
 
-module.exports = CachedMap;
+export default CachedMap;

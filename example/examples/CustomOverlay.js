@@ -1,11 +1,7 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Dimensions,
-} from 'react-native';
+import { StyleSheet, View, Dimensions } from 'react-native';
 
-import MapView from 'react-native-maps';
+import MapView, { ProviderPropType } from 'react-native-maps';
 import XMarksTheSpot from './CustomOverlayXMarksTheSpot';
 
 const { width, height } = Dimensions.get('window');
@@ -29,7 +25,7 @@ class CustomOverlay extends React.Component {
       coordinates: [
         {
           longitude: -122.442753,
-          latitude: 37.798790,
+          latitude: 37.79879,
         },
         {
           longitude: -122.424728,
@@ -68,7 +64,7 @@ class CustomOverlay extends React.Component {
 }
 
 CustomOverlay.propTypes = {
-  provider: MapView.ProviderPropType,
+  provider: ProviderPropType,
 };
 
 const styles = StyleSheet.create({
@@ -82,4 +78,4 @@ const styles = StyleSheet.create({
   },
 });
 
-module.exports = CustomOverlay;
+export default CustomOverlay;

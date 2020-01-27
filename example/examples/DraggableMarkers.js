@@ -1,11 +1,7 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Dimensions,
-} from 'react-native';
+import { StyleSheet, View, Dimensions } from 'react-native';
 
-import MapView from 'react-native-maps';
+import MapView, { Marker, ProviderPropType } from 'react-native-maps';
 import PriceMarker from './PriceMarker';
 
 const { width, height } = Dimensions.get('window');
@@ -50,24 +46,24 @@ class MarkerTypes extends React.Component {
             longitudeDelta: LONGITUDE_DELTA,
           }}
         >
-          <MapView.Marker
+          <Marker
             coordinate={this.state.a}
-            onSelect={(e) => log('onSelect', e)}
-            onDrag={(e) => log('onDrag', e)}
-            onDragStart={(e) => log('onDragStart', e)}
-            onDragEnd={(e) => log('onDragEnd', e)}
-            onPress={(e) => log('onPress', e)}
+            onSelect={e => log('onSelect', e)}
+            onDrag={e => log('onDrag', e)}
+            onDragStart={e => log('onDragStart', e)}
+            onDragEnd={e => log('onDragEnd', e)}
+            onPress={e => log('onPress', e)}
             draggable
           >
             <PriceMarker amount={99} />
-          </MapView.Marker>
-          <MapView.Marker
+          </Marker>
+          <Marker
             coordinate={this.state.b}
-            onSelect={(e) => log('onSelect', e)}
-            onDrag={(e) => log('onDrag', e)}
-            onDragStart={(e) => log('onDragStart', e)}
-            onDragEnd={(e) => log('onDragEnd', e)}
-            onPress={(e) => log('onPress', e)}
+            onSelect={e => log('onSelect', e)}
+            onDrag={e => log('onDrag', e)}
+            onDragStart={e => log('onDragStart', e)}
+            onDragEnd={e => log('onDragEnd', e)}
+            onPress={e => log('onPress', e)}
             draggable
           />
         </MapView>
@@ -77,7 +73,7 @@ class MarkerTypes extends React.Component {
 }
 
 MarkerTypes.propTypes = {
-  provider: MapView.ProviderPropType,
+  provider: ProviderPropType,
 };
 
 const styles = StyleSheet.create({
@@ -91,4 +87,4 @@ const styles = StyleSheet.create({
   },
 });
 
-module.exports = MarkerTypes;
+export default MarkerTypes;

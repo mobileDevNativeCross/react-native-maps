@@ -26,15 +26,21 @@ versions you should add `react` as a dependency in your `package.json`.
 
 [`<MapView />` Component API](docs/mapview.md)
 
-[`<MapView.Marker />` Component API](docs/marker.md)
+[`<Marker />` Component API](docs/marker.md)
 
-[`<MapView.Callout />` Component API](docs/callout.md)
+[`<Callout />` Component API](docs/callout.md)
 
-[`<MapView.Polygon />` Component API](docs/polygon.md)
+[`<Polygon />` Component API](docs/polygon.md)
 
-[`<MapView.Polyline />` Component API](docs/polyline.md)
+[`<Polyline />` Component API](docs/polyline.md)
 
-[`<MapView.Circle />` Component API](docs/circle.md)
+[`<Circle />` Component API](docs/circle.md)
+
+[`<Overlay />` Component API](docs/overlay.md)
+
+[`<Heatmap />` Component API](docs/heatmap.md)
+
+[`<Geojson />` Component API](docs/geojson.md)
 
 ## General Usage
 
@@ -96,12 +102,14 @@ render() {
 ### Rendering a list of markers on a map
 
 ```jsx
+import { Marker } from 'react-native-maps';
+
 <MapView
   region={this.state.region}
   onRegionChange={this.onRegionChange}
 >
   {this.state.markers.map(marker => (
-    <MapView.Marker
+    <Marker
       coordinate={marker.latlng}
       title={marker.title}
       description={marker.description}
@@ -113,15 +121,15 @@ render() {
 ### Rendering a Marker with a custom view
 
 ```jsx
-<MapView.Marker coordinate={marker.latlng}>
+<Marker coordinate={marker.latlng}>
   <MyCustomMarkerView {...marker} />
-</MapView.Marker>
+</Marker>
 ```
 
 ### Rendering a Marker with a custom image
 
 ```jsx
-<MapView.Marker
+<Marker
   coordinate={marker.latlng}
   image={require('../assets/pin.png')}
 />
@@ -130,19 +138,21 @@ render() {
 ### Rendering a custom Marker with a custom Callout
 
 ```jsx
-<MapView.Marker coordinate={marker.latlng}>
+import { Callout } from 'react-native-maps';
+
+<Marker coordinate={marker.latlng}>
   <MyCustomMarkerView {...marker} />
-  <MapView.Callout>
+  <Callout>
     <MyCustomCalloutView {...marker} />
-  </MapView.Callout>
-</MapView.Marker>
+  </Callout>
+</Marker>
 ```
 
 ### Draggable Markers
 
 ```jsx
 <MapView initialRegion={...}>
-  <MapView.Marker draggable
+  <Marker draggable
     coordinate={this.state.x}
     onDragEnd={(e) => this.setState({ x: e.nativeEvent.coordinate })}
   />
@@ -151,17 +161,31 @@ render() {
 
 ### Using a custom Tile Overlay
 
+#### Tile Overlay using tile server
+
 ```jsx
-<MapView 
+import { UrlTile } from 'react-native-maps';
+
+<MapView
   region={this.state.region}
   onRegionChange={this.onRegionChange}
 >
-  <MapView.UrlTile
-   /**
-   * The url template of the tile server. The patterns {x} {y} {z} will be replaced at runtime
-   * For example, http://c.tile.openstreetmap.org/{z}/{x}/{y}.png
-   */
+  <UrlTile
+    /**
+     * The url template of the tile server. The patterns {x} {y} {z} will be replaced at runtime
+     * For example, http://c.tile.openstreetmap.org/{z}/{x}/{y}.png
+     */
     urlTemplate={this.state.urlTemplate}
+    /**
+     * The maximum zoom level for this tile overlay. Corresponds to the maximumZ setting in
+     * MKTileOverlay. iOS only.
+     */
+    maximumZ={19}
+    /**
+     * flipY allows tiles with inverted y coordinates (origin at bottom left of map)
+     * to be used. Its default value is false.
+     */
+    flipY={false}
   />
 </MapView>
 ```
@@ -171,6 +195,57 @@ For Android: add the following line in your AndroidManifest.xml
 <uses-permission android:name="android.permission.INTERNET" />
 ```
 For IOS: configure [App Transport Security](https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW33) in your app
+
+#### Tile Overlay using local tiles
+
+Tiles can be stored locally within device using xyz tiling scheme and displayed as tile overlay as well. This is usefull especially for offline map usage when tiles are available for selected map region within device storage.
+
+```jsx
+import { LocalTile } from 'react-native-maps';
+
+<MapView
+  region={this.state.region}
+  onRegionChange={this.onRegionChange}
+>
+  <LocalTile
+   /**
+    * The path template of the locally stored tiles. The patterns {x} {y} {z} will be replaced at runtime
+    * For example, /storage/emulated/0/mytiles/{z}/{x}/{y}.png
+    */
+   pathTemplate={this.state.pathTemplate}
+   /**
+    * The size of provided local tiles (usually 256 or 512).
+    */
+   tileSize={256}
+  />
+</MapView>
+```
+
+For Android: LocalTile is still just overlay over original map tiles. It means that if device is online, underlying tiles will be still downloaded. If original tiles download/display is not desirable set mapType to 'none'. For example:
+```
+<MapView
+  mapType={Platform.OS == "android" ? "none" : "standard"}
+>
+```
+
+See [OSM Wiki](https://wiki.openstreetmap.org/wiki/Category:Tile_downloading) for how to download tiles for offline usage.
+
+### Overlaying other components on the map
+
+Place components you that wish to overlay `MapView` underneath the `MapView` closing tag. Absolutely position these elements.
+
+```jsx
+render() {
+  return (
+    <MapView
+      region={this.state.region}
+    />
+    <OverlayComponent
+      style={{position: “absolute”, bottom: 50}}
+    />
+  );
+}
+```
 
 ### Customizing the map style
 
@@ -205,11 +280,25 @@ import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 
 Then add the AirGoogleMaps directory:
 
-https://github.com/airbnb/react-native-maps/blob/1e71a21f39e7b88554852951f773c731c94680c9/docs/installation.md#ios
+https://github.com/react-native-community/react-native-maps/blob/1e71a21f39e7b88554852951f773c731c94680c9/docs/installation.md#ios
 
-An unoffical step-by-step guide is also available at https://gist.github.com/heron2014/e60fa003e9b117ce80d56bb1d5bfe9e0
+An unofficial step-by-step guide is also available at https://gist.github.com/heron2014/e60fa003e9b117ce80d56bb1d5bfe9e0
 
 ## Examples
+
+To run examples:
+
+```bash
+npm i
+npm start
+
+#Android
+npm run run:android
+
+#iOS
+npm run build:ios
+npm run run:ios
+```
 
 ### MapView Events
 
@@ -282,6 +371,14 @@ So far, `<Circle />`, `<Polygon />`, and `<Polyline />` are available to pass in
 
 
 
+### Gradient Polylines (iOS MapKit only)
+
+Gradient polylines can be created using the `strokeColors` prop of the `<Polyline>` component.
+
+![](https://i.imgur.com/P7UeqAm.png?1)
+
+
+
 ### Default Markers
 
 Default markers will be rendered unless a custom marker is specified. One can optionally adjust the
@@ -301,6 +398,9 @@ the `<Marker />`'s `title` and `description` props.
 
 Custom callout views can be the entire tooltip bubble, or just the content inside of the system
 default bubble.
+
+To handle press on specific subview of callout use `<CalloutSubview />` with `onPress`.
+See `Callouts.js` example.
 
 ![](http://i.giphy.com/xT77XNePGnMIIDpbnq.gif) ![](http://i.giphy.com/xT77YdU0HXryvoRqaQ.gif)
 
@@ -326,16 +426,22 @@ Enable lite mode on Android with `liteMode` prop. Ideal when having multiple map
 
 ![](http://i.giphy.com/qZ2lAf18s89na.gif)
 
+### On Poi Click (Google Maps Only)
+
+Poi are clickable, you can catch the event to get its information (usually to get the full detail from Google Place using the placeId).
+
+![](https://media.giphy.com/media/3480VsCKnHr31uCLU3/giphy.gif)
+
 ### Animated Region
 
-The MapView can accept an `MapView.AnimatedRegion` value as its `region` prop. This allows you to utilize the Animated API to control the map's center and zoom.
+The MapView can accept an `AnimatedRegion` value as its `region` prop. This allows you to utilize the Animated API to control the map's center and zoom.
 
 ```jsx
-import MapView from 'react-native-maps';
+import MapView, { AnimatedRegion, Animated } from 'react-native-maps';
 
 getInitialState() {
   return {
-    region: new MapView.AnimatedRegion({
+    region: new AnimatedRegion({
       latitude: LATITUDE,
       longitude: LONGITUDE,
       latitudeDelta: LATITUDE_DELTA,
@@ -350,7 +456,7 @@ onRegionChange(region) {
 
 render() {
   return (
-    <MapView.Animated
+    <Animated
       region={this.state.region}
       onRegionChange={this.onRegionChange}
     />
@@ -363,9 +469,11 @@ render() {
 Markers can also accept an `AnimatedRegion` value as a coordinate.
 
 ```jsx
+import Mapview, { AnimatedRegion, Marker } from 'react-native-maps';
+
 getInitialState() {
   return {
-    coordinate: new MapView.AnimatedRegion({
+    coordinate: new AnimatedRegion({
       latitude: LATITUDE,
       longitude: LONGITUDE,
     }),
@@ -373,18 +481,69 @@ getInitialState() {
 }
 
 componentWillReceiveProps(nextProps) {
+  const duration = 500
+
   if (this.props.coordinate !== nextProps.coordinate) {
-    this.state.coordinate.timing({
-      ...nextProps.coordinate,
-      duration: 500
-    }).start();
+    if (Platform.OS === 'android') {
+      if (this.marker) {
+        this.marker._component.animateMarkerToCoordinate(
+          nextProps.coordinate,
+          duration
+        );
+      }
+    } else {
+      this.state.coordinate.timing({
+        ...nextProps.coordinate,
+        duration
+      }).start();
+    }
   }
 }
 
 render() {
   return (
     <MapView initialRegion={...}>
-      <MapView.Marker.Animated coordinate={this.state.coordinate} />
+      <MapView.Marker.Animated
+        ref={marker => { this.marker = marker }}
+        coordinate={this.state.coordinate}
+      />
+    </MapView>
+  );
+}
+```
+
+If you need a smoother animation to move the marker on Android, you can modify the previous example:
+
+```jsx
+// ...
+
+componentWillReceiveProps(nextProps) {
+  const duration = 500
+
+  if (this.props.coordinate !== nextProps.coordinate) {
+    if (Platform.OS === 'android') {
+      if (this.marker) {
+        this.marker._component.animateMarkerToCoordinate(
+          nextProps.coordinate,
+          duration
+        );
+      }
+    } else {
+      this.state.coordinate.timing({
+        ...nextProps.coordinate,
+        duration
+      }).start();
+    }
+  }
+}
+
+render() {
+  return (
+    <MapView initialRegion={...}>
+      <Marker.Animated
+        ref={marker => { this.marker = marker }}
+        coordinate={this.state.coordinate}
+      />
     </MapView>
   );
 }
@@ -393,6 +552,8 @@ render() {
 ### Take Snapshot of map
 
 ```jsx
+import MapView, { Marker } from 'react-native-maps';
+
 getInitialState() {
   return {
     coordinate: {
@@ -405,7 +566,7 @@ getInitialState() {
 takeSnapshot () {
   // 'takeSnapshot' takes a config object with the
   // following options
-  const snapshot = this.refs.map.takeSnapshot({
+  const snapshot = this.map.takeSnapshot({
     width: 300,      // optional, when omitted the view-width is used
     height: 300,     // optional, when omitted the view-height is used
     region: {..},    // iOS only, optional region to render
@@ -421,8 +582,8 @@ takeSnapshot () {
 render() {
   return (
     <View>
-      <MapView initialRegion={...} ref="map">
-        <MapView.Marker coordinate={this.state.coordinate} />
+      <MapView initialRegion={...} ref={map => { this.map = map }}>
+        <Marker coordinate={this.state.coordinate} />
       </MapView>
       <Image source={{ uri: this.state.mapSnapshot.uri }} />
       <TouchableOpacity onPress={this.takeSnapshot}>
@@ -451,7 +612,8 @@ Pass an array of coordinates to focus a map region on said coordinates.
 
 * Make sure that you have [properly installed](docs/installation.md) react-native-maps.
 * Check in the logs if there is more informations about the issue.
-* Try setting the style of the MapView to an absolute position with top, left, right and bottom values set.
+* Try setting the style of the MapView to an absolute position with top, left, right and bottom  values set.
+*   Make sure you have enabled Google Maps API in [Google developer console](https://console.developers.google.com/apis/library)
 
 ```javascript
 const styles = StyleSheet.create({
@@ -494,7 +656,7 @@ Good:
 License
 --------
 
-     Copyright (c) 2015 Airbnb
+     Copyright (c) 2017 Airbnb
 
      Licensed under the The MIT License (MIT) (the "License");
      you may not use this file except in compliance with the License.

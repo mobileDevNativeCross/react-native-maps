@@ -6,7 +6,7 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import MapView from 'react-native-maps';
+import MapView, { Marker, ProviderPropType } from 'react-native-maps';
 import PriceMarker from './PriceMarker';
 
 const { width, height } = Dimensions.get('window');
@@ -52,22 +52,22 @@ class ViewsAsMarkers extends React.Component {
           style={styles.map}
           initialRegion={this.state.region}
         >
-          <MapView.Marker coordinate={this.state.coordinate}>
+          <Marker coordinate={this.state.coordinate}>
             <PriceMarker amount={this.state.amount} />
-          </MapView.Marker>
+          </Marker>
         </MapView>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={() => this.decrement()}
             style={[styles.bubble, styles.button]}
           >
-            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>-</Text>
+            <Text style={styles.ammountButton}>-</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => this.increment()}
             style={[styles.bubble, styles.button]}
           >
-            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>+</Text>
+            <Text style={styles.ammountButton}>+</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -76,7 +76,7 @@ class ViewsAsMarkers extends React.Component {
 }
 
 ViewsAsMarkers.propTypes = {
-  provider: MapView.ProviderPropType,
+  provider: ProviderPropType,
 };
 
 const styles = StyleSheet.create({
@@ -109,6 +109,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     backgroundColor: 'transparent',
   },
+  ammountButton: { fontSize: 20, fontWeight: 'bold' },
 });
 
-module.exports = ViewsAsMarkers;
+export default ViewsAsMarkers;

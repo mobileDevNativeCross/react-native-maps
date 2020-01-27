@@ -1,14 +1,15 @@
-import React, { PropTypes } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Dimensions,
-  ScrollView,
-} from 'react-native';
-// eslint-disable-next-line max-len
-import SyntheticEvent from 'react-native/Libraries/Renderer/src/renderers/shared/stack/event/SyntheticEvent';
-import MapView from 'react-native-maps';
+import React from 'react';
+import PropTypes from 'prop-types';
+
+import { StyleSheet, View, Text, Dimensions, ScrollView } from 'react-native';
+import MapView, {
+  PROVIDER_GOOGLE,
+  Marker,
+  ProviderPropType,
+  Polygon,
+  Polyline,
+  Callout,
+} from 'react-native-maps';
 import PriceMarker from './PriceMarker';
 
 const { width, height } = Dimensions.get('window');
@@ -30,7 +31,9 @@ class Event extends React.Component {
     return (
       <View style={styles.event}>
         <Text style={styles.eventName}>{event.name}</Text>
-        <Text style={styles.eventData}>{JSON.stringify(event.data, null, 2)}</Text>
+        <Text style={styles.eventData}>
+          {JSON.stringify(event.data, null, 2)}
+        </Text>
       </View>
     );
   }
@@ -40,8 +43,6 @@ Event.propTypes = {
   event: PropTypes.object,
 };
 
-
-// eslint-disable-next-line react/no-multi-comp
 class EventListener extends React.Component {
   constructor(props) {
     super(props);
@@ -67,27 +68,36 @@ class EventListener extends React.Component {
 
   recordEvent(name) {
     return e => {
-      if (e instanceof SyntheticEvent && typeof e.persist === 'function') {
-        e.persist();
+      if (e.persist) {
+        e.persist(); // Avoids warnings relating to https://fb.me/react-event-pooling
       }
       this.setState(prevState => ({
-        events: [
-          this.makeEvent(e, name),
-          ...prevState.events.slice(0, 10),
-        ],
+        events: [this.makeEvent(e, name), ...prevState.events.slice(0, 10)],
       }));
     };
   }
 
   render() {
+    // Events that are dependent on
+    let googleProviderProps = {};
+    if (this.props.provider === PROVIDER_GOOGLE) {
+      googleProviderProps = {
+        onUserLocationChange: this.recordEvent('Map::onUserLocationChange'),
+      };
+    }
+
     return (
       <View style={styles.container}>
         <MapView
           provider={this.props.provider}
           style={styles.map}
           initialRegion={this.state.region}
+          showsUserLocation
+          showsMyLocationButton
           onRegionChange={this.recordEvent('Map::onRegionChange')}
-          onRegionChangeComplete={this.recordEvent('Map::onRegionChangeComplete')}
+          onRegionChangeComplete={this.recordEvent(
+            'Map::onRegionChangeComplete'
+          )}
           onPress={this.recordEvent('Map::onPress')}
           onPanDrag={this.recordEvent('Map::onPanDrag')}
           onLongPress={this.recordEvent('Map::onLongPress')}
@@ -95,20 +105,21 @@ class EventListener extends React.Component {
           onMarkerSelect={this.recordEvent('Map::onMarkerSelect')}
           onMarkerDeselect={this.recordEvent('Map::onMarkerDeselect')}
           onCalloutPress={this.recordEvent('Map::onCalloutPress')}
+          {...googleProviderProps}
         >
-          <MapView.Marker
+          <Marker
             coordinate={{
-              latitude: LATITUDE + (LATITUDE_DELTA / 2),
-              longitude: LONGITUDE + (LONGITUDE_DELTA / 2),
+              latitude: LATITUDE + LATITUDE_DELTA / 2,
+              longitude: LONGITUDE + LONGITUDE_DELTA / 2,
             }}
           />
-          <MapView.Marker
+          <Marker
             coordinate={{
-              latitude: LATITUDE - (LATITUDE_DELTA / 2),
-              longitude: LONGITUDE - (LONGITUDE_DELTA / 2),
+              latitude: LATITUDE - LATITUDE_DELTA / 2,
+              longitude: LONGITUDE - LONGITUDE_DELTA / 2,
             }}
           />
-          <MapView.Marker
+          <Marker
             title="This is a title"
             description="This is a description"
             coordinate={this.state.region}
@@ -118,47 +129,59 @@ class EventListener extends React.Component {
             onCalloutPress={this.recordEvent('Marker::onCalloutPress')}
           >
             <PriceMarker amount={99} />
-            <MapView.Callout
+            <Callout
               style={styles.callout}
               onPress={this.recordEvent('Callout::onPress')}
             >
               <View>
                 <Text>Well hello there...</Text>
               </View>
-            </MapView.Callout>
-          </MapView.Marker>
-          <MapView.Polygon
+            </Callout>
+          </Marker>
+          <Polygon
             fillColor={'rgba(255,0,0,0.3)'}
             onPress={this.recordEvent('Polygon::onPress')}
-            coordinates={[{
-              latitude: LATITUDE + (LATITUDE_DELTA / 5),
-              longitude: LONGITUDE + (LONGITUDE_DELTA / 4),
-            }, {
-              latitude: LATITUDE + (LATITUDE_DELTA / 3),
-              longitude: LONGITUDE + (LONGITUDE_DELTA / 4),
-            }, {
-              latitude: LATITUDE + (LATITUDE_DELTA / 4),
-              longitude: LONGITUDE + (LONGITUDE_DELTA / 2),
-            }]}
+            tappable
+            coordinates={[
+              {
+                latitude: LATITUDE + LATITUDE_DELTA / 5,
+                longitude: LONGITUDE + LONGITUDE_DELTA / 4,
+              },
+              {
+                latitude: LATITUDE + LATITUDE_DELTA / 3,
+                longitude: LONGITUDE + LONGITUDE_DELTA / 4,
+              },
+              {
+                latitude: LATITUDE + LATITUDE_DELTA / 4,
+                longitude: LONGITUDE + LONGITUDE_DELTA / 2,
+              },
+            ]}
           />
-          <MapView.Polyline
+          <Polyline
             strokeColor={'rgba(255,0,0,1)'}
             onPress={this.recordEvent('Polyline::onPress')}
-            coordinates={[{
-              latitude: LATITUDE + (LATITUDE_DELTA / 5),
-              longitude: LONGITUDE - (LONGITUDE_DELTA / 4),
-            }, {
-              latitude: LATITUDE + (LATITUDE_DELTA / 3),
-              longitude: LONGITUDE - (LONGITUDE_DELTA / 4),
-            }, {
-              latitude: LATITUDE + (LATITUDE_DELTA / 4),
-              longitude: LONGITUDE - (LONGITUDE_DELTA / 2),
-            }]}
+            tappable
+            coordinates={[
+              {
+                latitude: LATITUDE + LATITUDE_DELTA / 5,
+                longitude: LONGITUDE - LONGITUDE_DELTA / 4,
+              },
+              {
+                latitude: LATITUDE + LATITUDE_DELTA / 3,
+                longitude: LONGITUDE - LONGITUDE_DELTA / 4,
+              },
+              {
+                latitude: LATITUDE + LATITUDE_DELTA / 4,
+                longitude: LONGITUDE - LONGITUDE_DELTA / 2,
+              },
+            ]}
           />
         </MapView>
         <View style={styles.eventList}>
           <ScrollView>
-            {this.state.events.map(event => <Event key={event.id} event={event} />)}
+            {this.state.events.map(event => (
+              <Event key={event.id} event={event} />
+            ))}
           </ScrollView>
         </View>
       </View>
@@ -167,7 +190,7 @@ class EventListener extends React.Component {
 }
 
 EventListener.propTypes = {
-  provider: MapView.ProviderPropType,
+  provider: ProviderPropType,
 };
 
 const styles = StyleSheet.create({
@@ -231,4 +254,4 @@ const styles = StyleSheet.create({
   },
 });
 
-module.exports = EventListener;
+export default EventListener;
